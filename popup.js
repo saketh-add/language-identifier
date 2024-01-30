@@ -1,32 +1,33 @@
 function onWindowLoad() {
-    var message = document.querySelector('#language');
+  var message = document.querySelector('#language');
 
-    chrome.tabs.query({ active: true, currentWindow: true }).then(function (tabs) {
-        var activeTab = tabs[0];
-        var activeTabId = activeTab.id;
+  chrome.tabs.query({ active: true, currentWindow: true }).then(function (tabs) {
+    var activeTab = tabs[0];
+    var activeTabId = activeTab.id;
 
-        return chrome.scripting.executeScript({
-            target: { tabId: activeTabId },
-            func: getLanguage
-        });
-
-    }).then(function (results) {
-	if(results[0].result == "error") document.getElementById('isLangPresent').style.display="none";
-        message.innerText = htmlLangCodes[results[0].result].toUpperCase();
-    }).catch(function (error) {
-	document.getElementById('isLangPresent').style.display="none";
-        message.innerText = 'There was an error injecting script : \n' + error.message;
+    return chrome.scripting.executeScript({
+      target: { tabId: activeTabId },
+      func: getLanguage
     });
+
+  }).then(function (results) {
+    const language = htmlLangCodes[results[0].result] != undefined ? htmlLangCodes[results[0].result] : "Language not defined";
+    if (results[0].result == "error" || language == "Language not defined") document.getElementById('isLangPresent').style.display = "none";
+    message.innerText = language.toUpperCase();
+  }).catch(function (error) {
+    document.getElementById('isLangPresent').style.display = "none";
+    message.innerText = 'There was an error injecting script : \n' + error.message;
+  });
 }
 
 window.onload = onWindowLoad;
 
 function getLanguage() {
   let langCode;
-  try{	
+  try {
     langCode = document.getElementsByTagName('html')[0].attributes.lang.value;
   }
-  catch(err){
+  catch (err) {
     langCode = "error"
   }
   return langCode;
@@ -59,6 +60,7 @@ const htmlLangCodes = {
   "en-US": "English (US)",
   "en-IN": "English (India)",
   "en-AU": "English (Australia)",
+  "en-CA": "English (Canada)",
   "eo": "Esperanto",
   "et": "Estonian",
   "tl": "Filipino",
@@ -144,5 +146,5 @@ const htmlLangCodes = {
   "yi": "Yiddish",
   "yo": "Yoruba",
   "zu": "Zulu",
-  "error" : "Lang Attribute is not declared"
+  "error": "Lang Attribute is not declared"
 };
